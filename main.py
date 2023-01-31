@@ -3,7 +3,7 @@ import discord
 import random
 from discord.ext import commands
 from discord.ext import tasks
-import mudkip_dsc_class
+import mudkip_dsc_class as mudkip_dsc_class
 from datetime import date
 from datetime import datetime
 
@@ -14,6 +14,7 @@ intents.members = True
 intents.message_content = True
 
 user_tt = {}
+user_period = {}
 late_start_days = [date(2023, 2, 15), date(2023, 2, 22), date(2023, 3, 22), date(2023, 3, 29), date(2023, 4, 19), date(2023, 4, 26), date(2023, 5, 24), date(2023, 5, 31)]
 
 
@@ -144,6 +145,63 @@ async def ls(ctx):
         await ctx.send("The next late start is in **" + str(day_diff.days) + "** days on **" + late_start_days[0].strftime("%b %d, %Y") + "**")
 
 @client.command()
+async def setperiod(ctx, per_num: int, course: str, room = 0, teacher = ""):
+    username = ctx.author.id
+
+    if user_period.__contains__(username) is False:
+        user_period[username] = []
+
+    user_period[username].insert(per_num - 1, mudkip_dsc_class.Periods(per_num, course, room, teacher))
+
+@client.command()
+async def sp(ctx, per_num: int, course: str, room = 0, teacher = ""):
+    username = ctx.author.id
+
+    if per_num < 1 or per_num > 4:
+        await ctx.send("Please enter a valid period number!")
+
+    if user_period.__contains__(username) is False:
+        user_period[username] = []
+
+    user_period[username].insert(per_num - 1, mudkip_dsc_class.Periods(per_num, course, room, teacher))
+
+@client.command()
+async def period(ctx, per_num: int):
+    username = ctx.author.id
+
+    if user_period.__contains__(username) is False:
+        await ctx.send("Please enter your period")
+
+    if per_num < 1 or per_num > 4:
+        await ctx.send("Please enter a valid period number!")
+
+    for i in user_period[username]:
+        if per_num == i.get_num():
+            index = i
+
+    await ctx.send(str(index))
+
+@client.command()
+async def p(ctx, per_num: int):
+    username = ctx.author.id
+
+    if user_period.__contains__(username) is False:
+        await ctx.send("Please enter your period")
+
+    if per_num < 1 or per_num > 4:
+        await ctx.send("Please enter a valid period number!")
+
+    for i in user_period[username]:
+        if per_num == i.get_num():
+            index = i
+
+    await ctx.send(str(index))
+
+@client.command()
+async def info(ctx):
+    await ctx.send("This bot is made by taemonster05#4520!")
+
+@client.command()
 async def help(ctx):
     help_embed = discord.Embed(colour=discord.Colour.blue(), title="Help", description="Mudkip Bot's Commands")
     
@@ -154,7 +212,9 @@ async def help(ctx):
     help_embed.add_field(name="!timetable/!tt", value="Sends your timetable", inline=False)
     help_embed.add_field(name="!day", value="Sends what day (1 or 2) it is today", inline=False)
     help_embed.add_field(name="!latestart/!ls", value="Sends when the next late start is", inline=False)
+    help_embed.add_field(name="!setperiod/!sp period_number course room_number teacher_name", value="Sets the period information (to skip room number enter 0 in parameter)", inline=False)
+    help_embed.add_field(name="!period/!p period_number", value="Sends the period information of the period requested", inline=False)
 
     await ctx.send(content=None, embed=help_embed)
 
-client.run('MTAwNDU5Njk3OTMxOTQ0NzU5NA.Gx9iSP.7KRLo0QCF-rVC9p7_zhDac7lKERg0ed87yGOSo')
+client.run('token')
